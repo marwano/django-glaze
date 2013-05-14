@@ -2,4 +2,4 @@
 # Copyright (C) 2013 Marwan Alsabbagh
 # license: BSD, see LICENSE for more details.
 
-__version__ = '0.1'
+__version__ = '0.2.dev'
