@@ -16,7 +16,6 @@ DEFAULT_LOGGING = {
     'formatters': {
         'default': {
             'format': '%(asctime)s %(levelname)5s - %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S',
         },
     },
     'handlers': {
@@ -35,9 +34,13 @@ DEFAULT_LOGGING = {
 
 
 def fetch_worker(url, stats):
-    start = timer()
-    urlopen(url).read()
-    stats.put((timer() - start) * 1000)
+    try:
+        start = timer()
+        urlopen(url).read()
+        stats.put((timer() - start) * 1000)
+    except:
+        logging.exception('exception occurred in fetch_worker()')
+        stats.put(0)
 
 
 class ReloaderTrick(Trick):
@@ -68,14 +71,9 @@ class ReloaderTrick(Trick):
 
     def kill_group(self, group):
         name = self.group_format % group
-        pids = []
-        for pid in get_pid_list():
-            try:
-                cmd = process_name(pid)
-            except IOError:
-                continue
-            if cmd and cmd[0].strip() == name:
-                pids.append(pid)
+        items = get_pid_list()
+        items = [(pid, process_name(pid, ignore_errors=True)) for pid in items]
+        pids = [pid for pid, cmd in items if cmd and cmd[0].strip() == name]
         logging.info('killing %r with pids %r' % (name, pids))
         for i in pids:
             try:
@@ -98,15 +96,21 @@ class ReloaderTrick(Trick):
         stats = ', '.join(["%dms" % i for i in sorted(stats)])
         logging.info('fetched %r with stats %s' % (self.fetch_url, stats))
 
-    def on_any_event(self, event):
-        if timer() - self.last_reload < self.wait:
-            logging.info('ignored event %r' % event)
-            return
-        logging.info('reload event %r' % event)
+    def reload(self):
         new = next(self.groups)
         self.save_htaccess(new)
         self.kill_group(self.current)
         self.fetch()
-        self.fetch()
         self.current = new
         self.last_reload = timer()
+
+    def on_any_event(self, event):
+        if timer() - self.last_reload < self.wait:
+            logging.info('ignored event %r' % event)
+        else:
+            logging.info('reload event %r' % event)
+            try:
+                self.reload()
+            except:
+                logging.exception('exception occurred in reload()')
+                raise
