@@ -10,6 +10,7 @@ from urllib import urlopen
 import logging.config
 import os
 import errno
+import time
 
 DEFAULT_LOGGING = {
     'version': 1,
@@ -45,7 +46,7 @@ def fetch_worker(url, stats):
 
 class ReloaderTrick(Trick):
     def __init__(
-            self, groups, htaccess, url=None, fetch_count=0,
+            self, groups, htaccess, url=None, fetch_count=0, fetch_delay=0.1,
             log_config=None, wait=2, signal=SIGTERM, group_format='(wsgi:%s)',
             **kwargs):
         super(ReloaderTrick, self).__init__(**kwargs)
@@ -59,6 +60,7 @@ class ReloaderTrick(Trick):
         self.signal = signal
         self.url = url
         self.fetch_count = fetch_count
+        self.fetch_delay = fetch_delay
         self.group_format = group_format
         self.last_reload = 0
         self.proc_count = 0
@@ -87,6 +89,7 @@ class ReloaderTrick(Trick):
                     raise
 
     def fetch(self):
+        time.sleep(self.fetch_delay)
         workers = []
         stats = []
         statsq = Queue()
@@ -99,7 +102,7 @@ class ReloaderTrick(Trick):
         for worker in workers:
             worker.join()
             stats.append(statsq.get())
-        stats = ', '.join(["%dms" % i for i in sorted(stats)])
+        stats = ', '.join(["%dms" % i for i in sorted(stats, reverse=True)])
         logging.info('fetched %r with stats %s' % (self.url, stats))
 
     def reload(self):
