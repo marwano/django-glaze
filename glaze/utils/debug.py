@@ -2,7 +2,7 @@
 from os.path import dirname, join
 import django.views.debug
 
-CUSTOM_500_PATH = join(dirname(__file__), 'templates', 'custom_500.html')
+CUSTOM_500_PATH = join(dirname(__file__), 'files', 'custom_500.html')
 
 
 def customize_500_template():
