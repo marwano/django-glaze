@@ -3,7 +3,7 @@ include *.txt
 include *.rst
 recursive-include docs *
 recursive-include tests *
-recursive-include glaze/utils/templates *
+recursive-include glaze/utils/files *
 recursive-exclude docs *.pyc
 recursive-exclude tests *.pyc
 prune docs/_build
