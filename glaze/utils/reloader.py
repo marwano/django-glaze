@@ -47,8 +47,8 @@ def fetch_worker(url, stats):
 class ReloaderTrick(Trick):
     def __init__(
             self, groups, htaccess, url=None, fetch_count=0, fetch_delay=0.1,
-            log_config=None, ignore_period=1, signal=SIGTERM, group_format='(wsgi:%s)',
-            **kwargs):
+            log_config=None, ignore_period=1, signal=SIGTERM,
+            source_directory=None, group_format='(wsgi:%s)', **kwargs):
         super(ReloaderTrick, self).__init__(**kwargs)
         log_config = log_config or DEFAULT_LOGGING
         logging.config.dictConfig(log_config)
@@ -65,6 +65,7 @@ class ReloaderTrick(Trick):
         self.last_reload = 0
         self.proc_count = 0
         self.save_htaccess(self.current)
+        self.source_directory = source_directory
 
     def save_htaccess(self, group):
         logging.info('setting group to %r in %r' % (group, self.htaccess))
