@@ -47,7 +47,7 @@ def fetch_worker(url, stats):
 class ReloaderTrick(Trick):
     def __init__(
             self, groups, htaccess, url=None, fetch_count=0, fetch_delay=0.1,
-            log_config=None, wait=2, signal=SIGTERM, group_format='(wsgi:%s)',
+            log_config=None, ignore_period=1, signal=SIGTERM, group_format='(wsgi:%s)',
             **kwargs):
         super(ReloaderTrick, self).__init__(**kwargs)
         log_config = log_config or DEFAULT_LOGGING
@@ -56,7 +56,7 @@ class ReloaderTrick(Trick):
         self.groups = cycle(groups)
         self.current = next(self.groups)
         self.htaccess = htaccess
-        self.wait = wait
+        self.ignore_period = ignore_period
         self.signal = signal
         self.url = url
         self.fetch_count = fetch_count
@@ -89,7 +89,9 @@ class ReloaderTrick(Trick):
                     raise
 
     def fetch(self):
-        time.sleep(self.fetch_delay)
+        if self.fetch_delay:
+            logging.info('sleeping for fetch delay of %ss' % self.fetch_delay)
+            time.sleep(self.fetch_delay)
         workers = []
         stats = []
         statsq = Queue()
@@ -115,7 +117,7 @@ class ReloaderTrick(Trick):
         self.last_reload = timer()
 
     def on_any_event(self, event):
-        if timer() - self.last_reload < self.wait:
+        if timer() - self.last_reload < self.ignore_period:
             logging.info('ignored event %r' % event)
         else:
             logging.info('reload event %r' % event)
