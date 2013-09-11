@@ -2,7 +2,7 @@
 from watchdog.tricks import Trick
 from itertools import cycle
 from timeit import default_timer as timer
-from signal import SIGTERM
+from signal import signal, SIGTERM
 from utile import get_pid_list, process_name
 from threading import Thread
 from Queue import Queue
@@ -11,6 +11,7 @@ import logging.config
 import os
 import errno
 import time
+import sys
 
 DEFAULT_LOGGING = {
     'version': 1,
@@ -47,17 +48,17 @@ def fetch_worker(url, stats):
 class ReloaderTrick(Trick):
     def __init__(
             self, groups, htaccess, url=None, fetch_count=0, fetch_delay=0.1,
-            log_config=None, ignore_period=1, signal=SIGTERM,
+            log_config=None, ignore_period=1, kill_signal=SIGTERM,
             source_directory=None, group_format='(wsgi:%s)', **kwargs):
         super(ReloaderTrick, self).__init__(**kwargs)
         log_config = log_config or DEFAULT_LOGGING
         logging.config.dictConfig(log_config)
-        logging.info('ReloaderTrick started')
+        logging.info('Reloader started PID[%s]' % os.getpid())
         self.groups = cycle(groups)
         self.current = next(self.groups)
         self.htaccess = htaccess
         self.ignore_period = ignore_period
-        self.signal = signal
+        self.kill_signal = kill_signal
         self.url = url
         self.fetch_count = fetch_count
         self.fetch_delay = fetch_delay
@@ -66,6 +67,11 @@ class ReloaderTrick(Trick):
         self.proc_count = 0
         self.save_htaccess(self.current)
         self.source_directory = source_directory
+        signal(SIGTERM, self.exit)
+
+    def exit(self, signum, frame):
+        logging.info('Reloader exiting PID[%s]' % os.getpid())
+        sys.exit()
 
     def save_htaccess(self, group):
         logging.info('setting group to %r in %r' % (group, self.htaccess))
@@ -84,7 +90,7 @@ class ReloaderTrick(Trick):
         logging.info('killing %r with pids %r' % (name, pids))
         for i in pids:
             try:
-                os.kill(i, self.signal)
+                os.kill(i, self.kill_signal)
             except OSError as e:
                 if e.errno != errno.ESRCH:  # ignore no such process errors
                     raise
