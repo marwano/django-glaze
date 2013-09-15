@@ -117,9 +117,9 @@ class ReloaderTrick(Trick):
     def reload(self):
         new = next(self.groups)
         self.save_htaccess(new)
-        self.kill_group(self.current)
         if self.url:
             self.fetch()
+        self.kill_group(self.current)
         self.current = new
         self.last_reload = timer()
 
