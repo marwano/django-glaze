@@ -5,6 +5,7 @@ from timeit import default_timer as timer
 from signal import signal, SIGTERM
 from utile import get_pid_list, process_name
 from threading import Thread
+from subprocess import check_output
 from Queue import Queue
 from urllib import urlopen
 import logging.config
@@ -35,6 +36,50 @@ DEFAULT_LOGGING = {
 }
 
 
+class BaseReloader(Trick):
+    def __init__(
+            self, log_config=None, source_directory=None, ignore_period=1,
+            reload_delay=0.1, **kwargs):
+        super(BaseReloader, self).__init__(**kwargs)
+        self.source_directory = source_directory
+        self.ignore_period = ignore_period
+        self.reload_delay = reload_delay
+        self.last_reload = 0        
+        log_config = log_config or DEFAULT_LOGGING
+        logging.config.dictConfig(log_config)
+        logging.info('Reloader started PID[%s]' % os.getpid())
+        signal(SIGTERM, self.exit)
+
+    def exit(self, signum, frame):
+        logging.info('Reloader exiting PID[%s]' % os.getpid())
+        sys.exit()
+
+    def on_any_event(self, event):
+        if timer() - self.last_reload < self.ignore_period:
+            logging.info('ignored event %r' % event)
+        else:
+            logging.info('reload event %r' % event)
+            if self.reload_delay:
+                msg = 'sleeping for reload delay of %ss' % self.reload_delay
+                logging.info(msg)
+                time.sleep(self.reload_delay)
+            try:
+                self.reload()
+            except:
+                logging.exception('exception occurred in reload()')
+                raise
+            self.last_reload = timer()
+            
+
+class CommandReloader(BaseReloader):
+    def __init__(self, command, **kwargs):
+        super(CommandReloader, self).__init__(**kwargs)
+        self.command = command
+
+    def reload(self):
+        check_output(self.command)
+
+
 def fetch_worker(url, stats):
     try:
         start = timer()
@@ -45,33 +90,20 @@ def fetch_worker(url, stats):
         stats.put(0)
 
 
-class ReloaderTrick(Trick):
+class WSGIReloader(BaseReloader):
     def __init__(
-            self, groups, htaccess, url=None, fetch_count=0, fetch_delay=0.1,
-            log_config=None, ignore_period=1, kill_signal=SIGTERM,
-            source_directory=None, group_format='(wsgi:%s)', **kwargs):
-        super(ReloaderTrick, self).__init__(**kwargs)
-        log_config = log_config or DEFAULT_LOGGING
-        logging.config.dictConfig(log_config)
-        logging.info('Reloader started PID[%s]' % os.getpid())
+            self, groups, htaccess, url=None, fetch_count=0,
+            kill_signal=SIGTERM, group_format='(wsgi:%s)', **kwargs):
+        super(WSGIReloader, self).__init__(**kwargs)
         self.groups = cycle(groups)
         self.current = next(self.groups)
         self.htaccess = htaccess
-        self.ignore_period = ignore_period
         self.kill_signal = kill_signal
         self.url = url
         self.fetch_count = fetch_count
-        self.fetch_delay = fetch_delay
         self.group_format = group_format
-        self.last_reload = 0
         self.proc_count = 0
         self.save_htaccess(self.current)
-        self.source_directory = source_directory
-        signal(SIGTERM, self.exit)
-
-    def exit(self, signum, frame):
-        logging.info('Reloader exiting PID[%s]' % os.getpid())
-        sys.exit()
 
     def save_htaccess(self, group):
         logging.info('setting group to %r in %r' % (group, self.htaccess))
@@ -96,9 +128,6 @@ class ReloaderTrick(Trick):
                     raise
 
     def fetch(self):
-        if self.fetch_delay:
-            logging.info('sleeping for fetch delay of %ss' % self.fetch_delay)
-            time.sleep(self.fetch_delay)
         workers = []
         stats = []
         statsq = Queue()
@@ -121,15 +150,3 @@ class ReloaderTrick(Trick):
             self.fetch()
         self.kill_group(self.current)
         self.current = new
-        self.last_reload = timer()
-
-    def on_any_event(self, event):
-        if timer() - self.last_reload < self.ignore_period:
-            logging.info('ignored event %r' % event)
-        else:
-            logging.info('reload event %r' % event)
-            try:
-                self.reload()
-            except:
-                logging.exception('exception occurred in reload()')
-                raise
