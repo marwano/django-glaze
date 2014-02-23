@@ -67,7 +67,6 @@ class BaseReloader(Trick):
                 self.reload()
             except:
                 logging.exception('exception occurred in reload()')
-                raise
             self.last_reload = timer()
             
 
