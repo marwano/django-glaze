@@ -78,11 +78,11 @@ class CommandReloader(BaseReloader):
         check_output(self.command)
 
 
-def fetch_worker(url, stats):
+def fetch_worker(url, statsq):
     try:
         start = timer()
         urlopen(url).read()
-        stats.put((timer() - start) * 1000)
+        statsq.put((timer() - start) * 1000)
     except:
         logging.exception('exception occurred in fetch_worker()')
         stats.put(0)
@@ -90,27 +90,30 @@ def fetch_worker(url, stats):
 
 class WSGIReloader(BaseReloader):
     def __init__(
-            self, groups, htaccess, url=None, fetch_count=0,
+            self, groups, htaccess, url=None, fetch_count=None,
             kill_signal=SIGTERM, group_format='(wsgi:%s)', **kwargs):
         super(WSGIReloader, self).__init__(**kwargs)
         self.groups = groups
         self.htaccess = htaccess
-        self.kill_signal = kill_signal
         self.url = url
         self.fetch_count = fetch_count
+        self.kill_signal = kill_signal
         self.group_format = group_format
-        self.proc_count = 0
 
-    def kill_group(self, group):
-        name = self.group_format % group
+    def current_group(self):
+        group = open(self.htaccess).read()
+        group = group.replace('SetEnv PROCESS_GROUP', '').strip()
+        enforce(group in self.groups, 'found invalid group %r' % group)
+        return group
+
+    def group_pids(self):
+        name = self.group_format % self.current_group()
         items = get_pid_list()
         items = [(pid, process_name(pid, ignore_errors=True)) for pid in items]
-        pids = [pid for pid, cmd in items if cmd and cmd[0].strip() == name]
-        self.proc_count = len(pids)
-        if not pids:
-            logging.error('no processes found with name %r' % name)
-            return
-        logging.info('killing %r with pids %r' % (name, pids))
+        return [pid for pid, cmd in items if cmd and cmd[0].strip() == name]
+
+    def kill_pids(self, pids):
+        logging.info('killing pids %r' % pids)
         for i in pids:
             try:
                 os.kill(i, self.kill_signal)
@@ -118,14 +121,13 @@ class WSGIReloader(BaseReloader):
                 if e.errno != errno.ESRCH:  # ignore no such process errors
                     raise
 
-    def fetch(self):
+    def fetch(self, proc_count):
         workers = []
         stats = []
         statsq = Queue()
-        count = self.fetch_count or self.proc_count
+        count = self.fetch_count or proc_count
         for i in range(count):
-            args = (self.url, statsq)
-            worker = Thread(target=fetch_worker, args=args)
+            worker = Thread(target=fetch_worker, args=(self.url, statsq))
             worker.start()
             workers.append(worker)
         for worker in workers:
@@ -135,13 +137,11 @@ class WSGIReloader(BaseReloader):
         logging.info('fetched %r with stats %s' % (self.url, stats))
 
     def reload(self):
-        logging.info('using htaccess at %r' % self.htaccess)
-        old = open(self.htaccess).read()
-        old = old.replace('SetEnv PROCESS_GROUP', '').strip()
-        enforce(old in self.groups, 'found invalid group %r' % old)
+        pids = self.group_pids()
+        old = self.current_group()
         new = self.groups[(self.groups.index(old) + 1) % 2]
         logging.info('changing group from %r to %r' % (old, new))
         swap_save(self.htaccess, 'SetEnv PROCESS_GROUP %s\n' % new)
         if self.url:
-            self.fetch()
-        self.kill_group(old)
+            self.fetch(len(pids))
+        self.kill_pids(pids)
