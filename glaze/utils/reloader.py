@@ -1,9 +1,8 @@
 
 from watchdog.tricks import Trick
-from itertools import cycle
 from timeit import default_timer as timer
 from signal import signal, SIGTERM
-from utile import get_pid_list, process_name
+from utile import get_pid_list, process_name, swap_save, enforce
 from threading import Thread
 from subprocess import check_output
 from Queue import Queue
@@ -44,7 +43,7 @@ class BaseReloader(Trick):
         self.source_directory = source_directory
         self.ignore_period = ignore_period
         self.reload_delay = reload_delay
-        self.last_reload = 0        
+        self.last_reload = 0
         log_config = log_config or DEFAULT_LOGGING
         logging.config.dictConfig(log_config)
         logging.info('Reloader started PID[%s]' % os.getpid())
@@ -68,7 +67,7 @@ class BaseReloader(Trick):
             except:
                 logging.exception('exception occurred in reload()')
             self.last_reload = timer()
-            
+
 
 class CommandReloader(BaseReloader):
     def __init__(self, command, **kwargs):
@@ -94,20 +93,13 @@ class WSGIReloader(BaseReloader):
             self, groups, htaccess, url=None, fetch_count=0,
             kill_signal=SIGTERM, group_format='(wsgi:%s)', **kwargs):
         super(WSGIReloader, self).__init__(**kwargs)
-        self.groups = cycle(groups)
-        self.current = next(self.groups)
+        self.groups = groups
         self.htaccess = htaccess
         self.kill_signal = kill_signal
         self.url = url
         self.fetch_count = fetch_count
         self.group_format = group_format
         self.proc_count = 0
-        self.save_htaccess(self.current)
-
-    def save_htaccess(self, group):
-        logging.info('setting group to %r in %r' % (group, self.htaccess))
-        with open(self.htaccess, 'w') as f:
-            f.write('SetEnv PROCESS_GROUP %s\n' % group)
 
     def kill_group(self, group):
         name = self.group_format % group
@@ -143,9 +135,13 @@ class WSGIReloader(BaseReloader):
         logging.info('fetched %r with stats %s' % (self.url, stats))
 
     def reload(self):
-        new = next(self.groups)
-        self.save_htaccess(new)
+        logging.info('using htaccess at %r' % self.htaccess)
+        old = open(self.htaccess).read()
+        old = old.replace('SetEnv PROCESS_GROUP', '').strip()
+        enforce(old in self.groups, 'found invalid group %r' % old)
+        new = self.groups[(self.groups.index(old) + 1) % 2]
+        logging.info('changing group from %r to %r' % (old, new))
+        swap_save(self.htaccess, 'SetEnv PROCESS_GROUP %s\n' % new)
         if self.url:
             self.fetch()
-        self.kill_group(self.current)
-        self.current = new
+        self.kill_group(old)
