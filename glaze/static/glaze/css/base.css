@@ -1,0 +1,30 @@
+
+#container {
+	display: table;
+    width: 960px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#header, #user-tools {
+	margin-top: 6px;
+}
+
+.breadcrumbs {
+	display: none;
+}
+
+.glaze-navbar {
+	border-top: 2px solid white;
+}
+
+.glaze-navbar ul {
+	list-style-type: none;
+	margin: 0px;
+	padding: 4px;
+}
+
+.glaze-navbar li {
+	display: inline-block;
+	padding: 4px;
+}
