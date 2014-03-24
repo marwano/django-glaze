@@ -20,7 +20,7 @@ setup(
     author_email='marwan.alsabbagh@gmail.com',
     url='https://github.com/marwano/django-glaze',
     license='BSD',
-    packages=['glaze', 'glaze.utils'],
+    packages=['glaze', 'glaze.utils', 'glaze.templatetags'],
     include_package_data=True,
     install_requires=[
         'utile>=0.3'

@@ -1,13 +1,25 @@
 
-#container {
-	display: table;
-    width: 960px;
+html {
+	overflow-y: scroll;
+}
+
+#header .glaze-navbar a:link, #header .glaze-navbar a:visited {
+    color: #666666;
+}
+
+#branding h1, #user-tools, .glaze-navbar-inner {
+    width: 940px;
 	margin-left: auto;
 	margin-right: auto;
 }
 
-#header, #user-tools {
-	margin-top: 6px;
+#user-tools {
+	position: static;
+	right: auto;
+	top: auto;
+	padding: 0px;
+	height: 26px;
+	margin-top: -26px;
 }
 
 .breadcrumbs {
@@ -15,16 +27,52 @@
 }
 
 .glaze-navbar {
-	border-top: 2px solid white;
+	background: #e1e1e1;
+	border: 1px solid #cccccc;
 }
 
 .glaze-navbar ul {
-	list-style-type: none;
+	list-style: none;
+	padding: 6px 0px;
 	margin: 0px;
-	padding: 4px;
 }
 
 .glaze-navbar li {
-	display: inline-block;
-	padding: 4px;
+	display: inline;
+	padding: 0px;
+	margin-right: 1em;
 }
+
+#content {
+	display: table;
+    width: 940px;
+	padding: 10px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+body.login #content {
+	display: block;
+	width: auto;
+	padding: 0px;
+    margin: 10px 15px;
+}
+
+body.dashboard .colMS {
+	margin-right: auto !important;
+}
+
+body.dashboard div#content {
+	width: 940px;
+}
+
+body.dashboard div#content-main {
+	width: 500px;
+}
+
+body.dashboard div#content-related {
+	width: 430px;
+	margin-right: 0px;
+}
+
+

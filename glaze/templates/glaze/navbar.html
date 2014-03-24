@@ -1,8 +1,10 @@
 <div class="glaze-navbar">
-	<ul>
-	{% for href, label in links %}
-		<li><a href="{{ href }}">{{ label }}</a></li>
-	{% endfor %}
-	</ul>
+	<div class="glaze-navbar-inner">
+		<ul>
+		{% for href, label in links %}
+			<li><a href="{{ href }}">{{ label }}</a></li>
+		{% endfor %}
+		</ul>
+	</div>
 </div>
 
