@@ -9,6 +9,9 @@ register = template.Library()
 
 @register.filter()
 def glaze_site_lookup(path, name):
-    namespace = urlresolvers.resolve(path).namespace
-    site = resolve(settings.GLAZE_SITE_LOOKUP[namespace])
-    return getattr(site, name)
+    try:
+        namespace = urlresolvers.resolve(path).namespace
+        site = resolve(settings.GLAZE_SITE_LOOKUP[namespace])
+        return getattr(site, name)
+    except:
+        return ''
