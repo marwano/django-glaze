@@ -1,6 +1,7 @@
 
 import sys
 from os.path import dirname, join
+from importlib import import_module
 
 
 def generate_django_warmup():
@@ -23,4 +24,15 @@ def generate_django_warmup():
 def warmup(profile):
     path = join(dirname(__file__), 'files', 'warmup_%s.txt' % profile)
     modules = open(path).read().splitlines()
-    map(__import__, modules)
+    map(import_module, modules)
+
+
+def warmup_pygments():
+    try:
+        from pygments import highlight
+        from pygments.lexers import PythonLexer
+        from pygments.formatters import HtmlFormatter
+        HtmlFormatter().get_style_defs('.highlight')
+        highlight('', PythonLexer(), HtmlFormatter())
+    except ImportError:
+        pass

@@ -1,0 +1,48 @@
+<div>
+<table>
+<thead>
+	<tr>
+		<td colspan="2">{{ model_name }}</td>
+	</tr>
+	<tr>
+		<th>name</th>
+		<th>value</th>
+	</tr>
+</thead>
+<tbody>
+	{% for key, val in brief.items %}
+	<tr>
+		<td>{{ key }}</td>
+		<td>{{ val }}</td>
+	</tr>
+	{% endfor %}
+	<tr>
+		<td colspan="2" align="center">
+			<a href="#" onclick="return GlazeToggleDetails('{{ id }}');">Toggle detailed info</a>
+		</td>
+	</tr>
+</tbody>
+</table>
+
+<span id="{{ id }}" class="glaze-details">
+<table>
+<thead>
+	<tr>
+		<th colspan="2">{{ model_name }}</th>
+	</tr>
+	<tr>
+		<th>name</th>
+		<th>value</th>
+	</tr>
+</thead>
+<tbody>
+	{% for key, val in detailed.items %}
+	<tr>
+		<td>{{ key }}</td>
+		<td>{{ val }}</td>
+	</tr>
+	{% endfor %}
+</tbody>
+</table>
+</span>
+</div>

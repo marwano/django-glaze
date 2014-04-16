@@ -1,0 +1,20 @@
+<div>
+<table>
+<thead>
+	<tr><td colspan="{{ rows.0.keys|length|default:1 }}">{{ count }} row(s)</td></tr>
+	<tr>
+	{% for label in rows.0.keys %}
+		<th>{{ label }}</th>
+	{% endfor %}
+	</tr>
+</thead>
+<tbody>
+	{% for row in rows %}
+		<tr>{% for item in row.values %}<td>{{ item }}</td>{% endfor %}</tr>
+	{% empty %}
+		<tr><td>(no results)</td></tr>
+	{% endfor %}
+	<tr><td colspan="{{ rows.0.keys|length|default:1 }}">{{ obj.query }}</td></tr>
+</tbody>
+</table>
+</div>

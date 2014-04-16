@@ -43,10 +43,10 @@ html {
 	margin-right: 1em;
 }
 
-#content {
+#content, .glaze-messagelist, #glaze-console {
 	display: table;
     width: 940px;
-	padding: 10px;
+	padding-top: 10px;
 	margin-left: auto;
 	margin-right: auto;
 }
