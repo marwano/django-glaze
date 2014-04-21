@@ -1,82 +1,19 @@
 
+{% load static from staticfiles %}
+
 {% if glaze_console_js or glaze_console_html %}
 <!-- Glaze Console -->
 
-<script type="text/javascript">
+<script type="text/javascript" src="{% static "glaze/js/console.js" %}"></script>
 
-function glaze_table(source) {
-	var keys = Object.keys(source[0]["fields"]);
-	var keys = ["pk"].concat(keys.sort());
-	var rows = [];
-	for (var i = 0; i < source.length; i++) {
-		var row = [];
-		var fields = source[i]["fields"];
-		fields["pk"] = source[i]["pk"];
-		for (var j = 0; j < keys.length; j++) {
-			row[keys[j]] = fields[keys[j]]
-		}
-		rows[i] = row;
-	}
-	return rows;
-}
-
-function GlazeToggleDetails(id) {
-	var e = document.getElementById(id);
-	e.style.display = (e.style.display == 'block') ? 'none' : 'block';
-	return false;
-}
-
-{{ glaze_console_js|safe }}
-</script>
+{% if glaze_console_js %}
+	<script type="text/javascript">{{ glaze_console_js|safe }}</script>
+{% endif %}
 
 {% if glaze_console_html %}
-<style type="text/css">
-#glaze-console, #glaze-console pre, #glaze-console td, #glaze-console th {
-    font-family: 'Courier New','Consolas','DejaVu Sans Mono',monospace;
-	font-size: 13px;
-	line-height: 120%;
-	color: black;
-}
-
-#glaze-console pre {
-    background-color: #F9F9F9;
-	border: 1px solid #DDDDDD;
-	padding: 0.5em;
-	margin: 10px 0;
-    overflow-x: auto;
-}
-
-#glaze-console a {
-	text-decoration: none;
-	color: #5B80B2;
-}
-
-#glaze-console thead th, #glaze-console thead td {
-	background: #DDDDDD;
-}
-
-#glaze-console table, #glaze-console th, #glaze-console td {
-	border: 1px solid #BBBBBB;
-	padding: 3px 6px;
-}
-
-#glaze-console table {
-	border-collapse: collapse;
-	margin: 10px 0;
-}
-
-.glaze-details td {
-	white-space: pre;
-}
-
-.glaze-details {
-	display: none;
-}
-
-</style>
-<div id="glaze-console">
-	{{ glaze_console_html|safe }}
-</div>
+	<link rel="stylesheet" type="text/css" href="{% static "glaze/css/console.css" %}" />
+	<link rel="stylesheet" type="text/css" href="{% static "glaze/css/pygments.css" %}" />
+	<div id="glaze-console">{{ glaze_console_html|safe }}</div>
 {% endif %}
 
 <!-- END Glaze Console -->

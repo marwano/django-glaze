@@ -28,20 +28,20 @@ class FirebugConsole(BaseConsole):
     def error(self, obj):
         self._call_method('error', obj)
 
-    def model_table(self, obj, title):
-        rows = serialize('json', obj)
-        self.write_js('console.group(%s);\n' % json.dumps(title))
-        self.write_js('console.table(glaze_table(%s));\n' % rows)
-        if hasattr(obj, 'query'):
-            self.log(obj.query)
-        self.write_js('console.groupEnd();\n')
-
     def dump(self, obj):
         if isinstance(obj, models.query.QuerySet):
             title = 'QuerySet: {0:,} row(s)'.format(obj.count())
-            self.model_table(obj[0:self.max_rows], title)
+            self.write_js('console.group(%s);\n' % json.dumps(title))
+            data = serialize('json', obj[0:self.max_rows])
+            self.write_js('console.table(glaze_table(%s));\n' % data)
+            self.log(obj.query)
+            self.write_js('console.groupEnd();\n')
         elif isinstance(obj, models.Model):
-            self.model_table([obj], 'Model: %s' % obj._meta)
+            title = 'Model: %s' % obj._meta
+            self.write_js('console.group(%s);\n' % json.dumps(title))
+            data = serialize('json', [obj])
+            self.write_js('console.dir(glaze_table(%s)[0]);\n' % data)
+            self.write_js('console.groupEnd();\n')
         else:
             self.log(pformat(obj))
 

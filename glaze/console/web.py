@@ -14,7 +14,7 @@ try:
     from pygments.lexers import PythonLexer
     from pygments.formatters import HtmlFormatter
 except ImportError:
-    highlight, PythonLexer, HtmlFormatter = None
+    highlight = None
 
 
 def brief_model(obj):
@@ -26,21 +26,18 @@ def brief_model(obj):
 
 def detailed_model(obj):
     names = sorted(dir(obj), key=lambda s: s.lower())
-    return OrderedDict([(i, pformat(getattr(obj, i, None))) for i in names])
+    data = OrderedDict()
+    for name in names:
+        try:
+            data[name] = pformat(getattr(obj, name, None))
+        except Exception as err:
+            data[name] = pformat(err)
+    return data
 
 
 class WebConsole(BaseConsole):
     query_set_template = 'glaze/console_query_set.html'
     model_template = 'glaze/console_model.html'
-    pygments_style = 'default'
-
-    def html_header(self):
-        if HtmlFormatter:
-            formatter = HtmlFormatter(style=self.pygments_style)
-            css = formatter.get_style_defs('.highlight')
-            return '<style type="text/css">%s</style>' % css
-        else:
-            return ''
 
     def log(self, obj):
         self.write_html('<pre>%s</pre>' % escape(obj))

@@ -12,9 +12,6 @@ class BaseConsole(object):
         self.storage = storage
         self.max_rows = max_rows
 
-    def html_header(self):
-        return ''
-
     def check_settings(self):
         if CONSOLE_MIDDLEWARE not in settings.MIDDLEWARE_CLASSES:
             template = "'%s' is not in your MIDDLEWARE_CLASSES setting."
@@ -22,8 +19,6 @@ class BaseConsole(object):
 
     def write_html(self, val):
         self.check_settings()
-        if not self.storage.html.getvalue():
-            self.storage.html.write(self.html_header())
         self.storage.html.write(val)
 
     def write_js(self, val):
