@@ -1,26 +1,22 @@
 
-from django.core.exceptions import ImproperlyConfigured
-from django.conf import settings
-
-
-CONSOLE_MIDDLEWARE = 'glaze.console.middleware.ConsoleMiddleware'
+from django.contrib import messages
+from django.utils.safestring import mark_safe
+from glaze.middleware import get_request
 
 
 class BaseConsole(object):
 
-    def __init__(self, storage, max_rows=10):
-        self.storage = storage
+    def __init__(self, request=None, max_rows=10):
+        self.request = request
         self.max_rows = max_rows
 
-    def check_settings(self):
-        if CONSOLE_MIDDLEWARE not in settings.MIDDLEWARE_CLASSES:
-            template = "'%s' is not in your MIDDLEWARE_CLASSES setting."
-            raise ImproperlyConfigured(template % CONSOLE_MIDDLEWARE)
+    def add_message(self, message, extra_tags=''):
+        request = self.request or get_request()
+        messages.add_message(request, messages.INFO, message, extra_tags)
 
-    def write_html(self, val):
-        self.check_settings()
-        self.storage.html.write(val)
+    def add_html(self, html):
+        self.add_message(mark_safe(html), 'glaze-console-html')
 
-    def write_js(self, val):
-        self.check_settings()
-        self.storage.js.write(val)
+    def add_js(self, js):
+        js = '<script type="text/javascript">%s</script>' % js
+        self.add_message(mark_safe(js), 'glaze-console-js')

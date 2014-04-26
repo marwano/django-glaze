@@ -1,5 +1,7 @@
 
-function glaze_table(source) {
+var glaze = glaze || {};
+
+glaze.consoleTable = function(source) {
 	var keys = Object.keys(source[0]["fields"]);
 	var keys = ["pk"].concat(keys.sort());
 	var rows = [];
@@ -13,11 +15,10 @@ function glaze_table(source) {
 		rows[i] = row;
 	}
 	return rows;
-}
+};
 
-function GlazeToggleDetails(id) {
+glaze.consoleToggleDetails = function(id) {
 	var e = document.getElementById(id);
 	e.style.display = (e.style.display == 'block') ? 'none' : 'block';
 	return false;
-}
-
+};

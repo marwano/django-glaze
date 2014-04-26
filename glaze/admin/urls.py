@@ -30,7 +30,7 @@ class MappedURLsMixin(object):
                 view = site.admin_view(view, cacheable=i.url.cacheable)
             name = i.url.name
             if name and isinstance(self, ModelAdmin):
-                name = name.format(**self.model._meta.__dict__)
+                name = name % self.model._meta.__dict__
             new_urls.append(url(regex=i.url.regex, view=view, name=name))
         return new_urls + urls
 

@@ -43,12 +43,19 @@ html {
 	margin-right: 1em;
 }
 
-#content, .glaze-messagelist, #glaze-console {
+#content, .glaze-messagelist {
 	display: table;
     width: 940px;
-	padding-top: 10px;
-	margin-left: auto;
-	margin-right: auto;
+	margin: 10px auto;
+}
+
+ul.messagelist li {
+	border: 1px solid #DDDDDD;
+	margin: 0px 0px 10px 0px;
+}
+
+.results a {
+	display: block;
 }
 
 body.login #content {

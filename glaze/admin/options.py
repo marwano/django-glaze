@@ -9,3 +9,8 @@ class BaseGlazeModelAdmin(ProcessURLsMixin, ModelAdmin):
 
 class GlazeModelAdmin(BaseGlazeModelAdmin, MappedURLsMixin):
     pass
+
+
+class DisableDeleteMixin(object):
+    def has_delete_permission(self, request, obj=None):
+        return False

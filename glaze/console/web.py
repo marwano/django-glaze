@@ -6,8 +6,7 @@ from django.db import models
 from django.utils.html import escape
 from django.template import loader, Context
 from django.forms.models import model_to_dict
-from glaze.console.middleware import storage
-from glaze.console.base import BaseConsole
+from .base import BaseConsole
 
 try:
     from pygments import highlight
@@ -40,10 +39,10 @@ class WebConsole(BaseConsole):
     model_template = 'glaze/console_model.html'
 
     def log(self, obj):
-        self.write_html('<pre>%s</pre>' % escape(obj))
+        self.add_html('<pre>%s</pre>' % escape(obj))
 
     def template(self, name, context):
-        self.write_html(loader.get_template(name).render(Context(context)))
+        self.add_html(loader.get_template(name).render(Context(context)))
 
     def dump(self, obj):
         if isinstance(obj, models.query.QuerySet):
@@ -63,7 +62,7 @@ class WebConsole(BaseConsole):
                 html = highlight(pformat(obj), PythonLexer(), HtmlFormatter())
             else:
                 html = '<pre>%s</pre>' % escape(pformat(obj))
-            self.write_html(html)
+            self.add_html(html)
 
 
-console = WebConsole(storage)
+console = WebConsole()
