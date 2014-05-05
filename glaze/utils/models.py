@@ -1,6 +1,4 @@
 
-from django.forms.models import model_to_dict
-
 
 class UpdateMixin(object):
     def update(self, **kwargs):
@@ -10,12 +8,10 @@ class UpdateMixin(object):
 
 
 class LabelMixin(object):
-    label_format = '%(pk)s'
+    label_format = '{self.pk}'
 
     def __unicode__(self):
-        data = model_to_dict(self)
-        data['pk'] = self.pk
-        return self.label_format % data
+        return self.label_format.format(self=self)
 
 
 def fieldset(fields, name=None, **field_options):

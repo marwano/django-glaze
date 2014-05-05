@@ -9,7 +9,7 @@ from django.utils.text import capfirst
 from django.conf import settings
 from django.utils.cache import patch_response_headers
 from django.views.decorators.cache import cache_page
-from .urls import ProcessURLsMixin, MappedURLsMixin
+from .urls import ProcessURLsMixin, MappedURLsMixin, ExtraURLsMixin
 
 TEN_YEARS = 60*60*24*365*10
 
@@ -63,6 +63,7 @@ class BaseGlazeAdminSite(ProcessURLsMixin, AdminSite):
     pass
 
 
-class GlazeAdminSite(BaseGlazeAdminSite, MappedURLsMixin, SiteLinksMixin,
-                     JavascriptI18NCacheMixin, BackPort17Mixin):
+class GlazeAdminSite(BaseGlazeAdminSite, MappedURLsMixin, ExtraURLsMixin,
+                     SiteLinksMixin, JavascriptI18NCacheMixin,
+                     BackPort17Mixin):
     pass

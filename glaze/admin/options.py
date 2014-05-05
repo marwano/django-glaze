@@ -1,13 +1,13 @@
 
 from django.contrib.admin import ModelAdmin
-from .urls import ProcessURLsMixin, MappedURLsMixin
+from .urls import ProcessURLsMixin, MappedURLsMixin, ExtraURLsMixin
 
 
 class BaseGlazeModelAdmin(ProcessURLsMixin, ModelAdmin):
     pass
 
 
-class GlazeModelAdmin(BaseGlazeModelAdmin, MappedURLsMixin):
+class GlazeModelAdmin(BaseGlazeModelAdmin, MappedURLsMixin, ExtraURLsMixin):
     pass
 
 
