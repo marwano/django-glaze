@@ -50,6 +50,17 @@ ul.messagelist li.glaze-console-js {
 	display: none;
 }
 
+/* apply correct li ul styles even when console is used outside admin */
+
+ul.messagelist li {
+    display: block;
+	margin: 0px 0px 10px 0px;
+}
+
+ul.messagelist {
+    padding: 0 0 5px 0;
+    margin: 0;
+}
 
 /*
 	PYGMENTS HIGHLIGHTING
