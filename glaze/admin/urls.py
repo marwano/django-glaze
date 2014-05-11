@@ -7,10 +7,11 @@ from utile import enforce
 
 
 class AdminURL(object):
-    def __init__(self, regex, view=None, name=None, admin_view=True,
-                 cacheable=False):
+    def __init__(self, regex, view=None, kwargs=None, name=None,
+                 admin_view=True, cacheable=False):
         self.regex = regex
         self.view = view
+        self.kwargs = kwargs
         self.name = name
         self.admin_view = admin_view
         self.cacheable = cacheable
@@ -23,14 +24,15 @@ class AdminURL(object):
         name = self.name
         if name and isinstance(obj, ModelAdmin):
             name = name.format(**obj.model._meta.__dict__)
-        return url(regex=self.regex, view=view, name=name)
+        return url(self.regex, view, self.kwargs, name)
 
 
 def map_admin_url(regex, name=None, admin_view=True, cacheable=False):
     def decorator(method):
         enforce(method.__name__.endswith('_view'),
                 "%r method does not end with '_view'" % method.__name__)
-        method.admin_url = AdminURL(regex, None, name, admin_view, cacheable)
+        method.admin_url = AdminURL(regex, name=name, admin_view=admin_view,
+                                    cacheable=cacheable)
         return method
     return decorator
 
