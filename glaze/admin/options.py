@@ -14,3 +14,8 @@ class GlazeModelAdmin(BaseGlazeModelAdmin, MappedURLsMixin, ExtraURLsMixin):
 class DisableDeleteMixin(object):
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+class DisableAddMixin(object):
+    def has_add_permission(self, request, obj=None):
+        return False
