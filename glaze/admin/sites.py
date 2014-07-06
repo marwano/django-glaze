@@ -1,7 +1,7 @@
 
 import hashlib
 from django.contrib.admin import AdminSite
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse_lazy
 from django.utils.translation import ugettext_lazy
 from django.db.models.base import ModelBase
 from django.conf.urls import patterns, url, include
@@ -27,7 +27,7 @@ class SiteLinksMixin(object):
             if isinstance(val, ModelBase):
                 info = (val._meta.app_label, val._meta.model_name)
                 viewname = 'admin:%s_%s_changelist' % info
-                url = reverse(viewname, current_app=self.name)
+                url = reverse_lazy(viewname, current_app=self.name)
                 label = capfirst(val._meta.verbose_name_plural)
                 links[key] = (url, label)
         return links
@@ -59,11 +59,7 @@ class JavascriptI18NCacheMixin(object):
         return urls
 
 
-class BaseGlazeAdminSite(ProcessURLsMixin, AdminSite):
-    pass
-
-
-class GlazeAdminSite(BaseGlazeAdminSite, MappedURLsMixin, ExtraURLsMixin,
+class GlazeAdminSite(ProcessURLsMixin, MappedURLsMixin, ExtraURLsMixin,
                      SiteLinksMixin, JavascriptI18NCacheMixin,
-                     BackPort17Mixin):
+                     BackPort17Mixin, AdminSite):
     pass

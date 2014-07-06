@@ -1,0 +1,3 @@
+{% load i18n admin_urls %}
+{% url opts|admin_urlname:'changelist' as changelist_url %}
+<input type="button" value="{% trans 'Close' %}" onclick="window.location='{% add_preserved_filters changelist_url %}';" />

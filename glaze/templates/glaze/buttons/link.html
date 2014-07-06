@@ -1,0 +1,3 @@
+{% load admin_urls %}
+{% url opts|admin_urlname:button.url_name original.pk|admin_urlquote as button_url %}
+<input type="button" value="{{ button.label }}" onclick="window.location='{% add_preserved_filters button_url %}';" />

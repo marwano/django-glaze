@@ -1,4 +1,7 @@
 
+from django.conf import settings
+from django.db.models import Model, ForeignKey
+
 
 class UpdateMixin(object):
     def update(self, **kwargs):
@@ -17,3 +20,10 @@ class LabelMixin(object):
 def fieldset(fields, name=None, **field_options):
     fields = fields.split() if isinstance(fields, basestring) else fields
     return (name, dict(fields=fields, **field_options))
+
+
+class CreatedByMixin(Model):
+    created_by = ForeignKey(settings.AUTH_USER_MODEL)
+
+    class Meta:
+        abstract = True
