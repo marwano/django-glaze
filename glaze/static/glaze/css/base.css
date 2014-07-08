@@ -49,6 +49,12 @@ html {
 	margin: 10px auto;
 }
 
+.login .glaze-messagelist {
+    display: inline;
+    margin: 0px;
+    width: auto;
+}
+
 .popup #content {
     margin: 10px 15px;
     width: 95%;
