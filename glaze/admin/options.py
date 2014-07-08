@@ -76,7 +76,7 @@ class DisableAddMixin(object):
 
 class AllFieldsReadOnlyMixin(object):
     def get_readonly_fields(self, request, obj=None):
-        return [f.name for f in self.model._meta.fields]
+        return self.model._meta.get_all_field_names()
 
 
 # Set TOTAL_FORM_COUNT to 0 so that read-only inlines don't get saved.
