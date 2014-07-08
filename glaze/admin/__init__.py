@@ -4,7 +4,7 @@ from .sites import (
     BackPort17Mixin
 )
 from .urls import ProcessURLsMixin, MappedURLsMixin, AdminURL, map_admin_url
-from .utils import foreign_list
+from .utils import foreign_fields
 from .options import (
     DisableDeleteMixin, DisableAddMixin, AllFieldsReadOnlyMixin,
     GlazeModelAdmin, ReadOnlyInline

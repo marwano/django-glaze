@@ -3,7 +3,7 @@ from django.utils import six
 from glaze.utils.text import deslugify
 
 
-def foreign_list(*args):
+def foreign_fields(*args):
     items = []
     for i in args:
         if isinstance(i, six.string_types) and '__' in i:
