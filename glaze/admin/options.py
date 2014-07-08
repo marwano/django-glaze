@@ -1,6 +1,8 @@
 
 from inspect import isclass
-from django.contrib.admin import ModelAdmin
+from django.contrib.admin import ModelAdmin, TabularInline
+from django.forms.models import BaseInlineFormSet
+from django.forms.formsets import TOTAL_FORM_COUNT
 from django.utils.decorators import method_decorator
 from glaze.utils.models import CreatedByMixin
 from .urls import ProcessURLsMixin, MappedURLsMixin, ExtraURLsMixin
@@ -11,6 +13,7 @@ from .buttons import (SaveButton, SaveAsNewButton, SaveAddAnotherButton,
 class GlazeMediaMixin(object):
     class Media:
         js = ['glaze/js/admin.js']
+        css = dict(all=['glaze/css/admin.css'])
 
 
 class PreSaveModelMixin(object):
@@ -61,12 +64,6 @@ class SubmitRowMixin(object):
             method(request, obj, form, change)
 
 
-class GlazeModelAdmin(
-        ProcessURLsMixin, MappedURLsMixin, ExtraURLsMixin, SaveCreatedByMixin,
-        PreSaveModelMixin, GlazeMediaMixin, SubmitRowMixin, ModelAdmin):
-    pass
-
-
 class DisableDeleteMixin(object):
     def has_delete_permission(self, request, obj=None):
         return False
@@ -75,3 +72,30 @@ class DisableDeleteMixin(object):
 class DisableAddMixin(object):
     def has_add_permission(self, request, obj=None):
         return False
+
+
+class AllFieldsReadOnlyMixin(object):
+    def get_readonly_fields(self, request, obj=None):
+        return [f.name for f in self.model._meta.fields]
+
+
+# Set TOTAL_FORM_COUNT to 0 so that read-only inlines don't get saved.
+class ReadOnlyFormSet(BaseInlineFormSet):
+    @property
+    def management_form(self):
+        form = super(ReadOnlyFormSet, self).management_form
+        form.initial[TOTAL_FORM_COUNT] = 0
+        return form
+
+
+class ReadOnlyInline(DisableAddMixin, DisableDeleteMixin, GlazeMediaMixin,
+                     AllFieldsReadOnlyMixin, TabularInline):
+    template = 'glaze/read_only_inline.html'
+    formset = ReadOnlyFormSet
+    below_submit_buttons = True
+
+
+class GlazeModelAdmin(
+        ProcessURLsMixin, MappedURLsMixin, ExtraURLsMixin, SaveCreatedByMixin,
+        PreSaveModelMixin, GlazeMediaMixin, SubmitRowMixin, ModelAdmin):
+    pass

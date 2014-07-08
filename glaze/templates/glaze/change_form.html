@@ -1,4 +1,22 @@
 {% extends "admin/change_form.html" %}
 {% load glaze_submit_row from glaze %}
-{% block submit_buttons_top %}{% glaze_submit_row %}{% endblock %}
-{% block submit_buttons_bottom %}{% glaze_submit_row %}{% endblock %}
+{% block submit_buttons_top %}
+{% glaze_submit_row %}
+{% endblock submit_buttons_top %}
+
+{% block inline_field_sets %}
+{% for inline_admin_formset in inline_admin_formsets %}
+  {% if not inline_admin_formset.opts.below_submit_buttons %}
+    {% include inline_admin_formset.opts.template %}
+  {% endif %}
+{% endfor %}
+{% endblock inline_field_sets %}
+
+{% block submit_buttons_bottom %}
+{% glaze_submit_row %}
+{% for inline_admin_formset in inline_admin_formsets %}
+  {% if inline_admin_formset.opts.below_submit_buttons %}
+    {% include inline_admin_formset.opts.template %}
+  {% endif %}
+{% endfor %}
+{% endblock submit_buttons_bottom %}

@@ -1,0 +1,12 @@
+
+.glaze-read-only-inline .inline-group .tabular td.original p {
+	display: none;
+}
+
+.glaze-read-only-inline .inline-group .tabular tr.has_original td {
+    padding-top: 0;
+}
+
+.glaze-read-only-inline .form-row p {
+    margin: 0;
+}
