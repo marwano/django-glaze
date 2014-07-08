@@ -49,6 +49,11 @@ html {
 	margin: 10px auto;
 }
 
+.popup #content {
+    margin: 10px 15px;
+    width: 95%;
+}
+
 ul.messagelist li {
 	border: 1px solid #DDDDDD;
 	margin: 0px 0px 10px 0px;
