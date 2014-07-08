@@ -1,18 +1,23 @@
 
+from functools import partial
 from django.utils import six
 from glaze.utils.text import deslugify
 
 
-def foreign_fields(*args):
+def _get_foreign_field_value(obj, names):
+    return reduce(getattr, names, obj)
+
+
+def foreign_fields(*fields):
     items = []
-    for i in args:
-        if isinstance(i, six.string_types) and '__' in i:
-            names = i.split('__')
-            accessor = lambda obj: reduce(getattr, names, obj)
-            accessor.__name__ = names[-1]
-            accessor.short_description = deslugify(names[-1])
-            accessor.admin_order_field = i
-            items.append(accessor)
+    for field in fields:
+        if isinstance(field, six.string_types) and '__' in field:
+            names = field.split('__')
+            func = partial(_get_foreign_field_value, names=names)
+            func.__name__ = names[-1]
+            func.short_description = deslugify(names[-1])
+            func.admin_order_field = field
+            items.append(func)
         else:
-            items.append(i)
+            items.append(field)
     return items
