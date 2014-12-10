@@ -11,7 +11,7 @@ class UpdateMixin(object):
 
 
 class LabelMixin(object):
-    label_format = '{self.pk}'
+    label_format = u'{self.pk}'
 
     def __unicode__(self):
         return self.label_format.format(self=self)
