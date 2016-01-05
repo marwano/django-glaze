@@ -1,8 +1,11 @@
+from django.contrib.staticfiles import storage
 
-from django.contrib.staticfiles.storage import CachedStaticFilesStorage
 
-class ForcedCachedStaticFilesStorage(CachedStaticFilesStorage):
-
+class ForcedCachedStaticFilesStorage(storage.CachedStaticFilesStorage):
     def url(self, name, force=True):
         return super(ForcedCachedStaticFilesStorage, self).url(name, force)
 
+
+class ForcedManifestStaticFilesStorage(storage.ManifestStaticFilesStorage):
+    def url(self, name, force=True):
+        return super(ForcedManifestStaticFilesStorage, self).url(name, force)
