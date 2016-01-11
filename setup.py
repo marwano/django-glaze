@@ -21,7 +21,7 @@ setup(
     url='https://github.com/marwano/django-glaze',
     license='BSD',
     packages=[
-        'glaze', 'glaze.console', 'glaze.utils', 'glaze.templatetags',
+        'glaze', 'glaze.utils', 'glaze.templatetags',
         'glaze.admin',
     ],
     include_package_data=True,
