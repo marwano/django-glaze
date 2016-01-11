@@ -1,8 +1,5 @@
 
-from .sites import (
-    GlazeAdminSite, SiteLinksMixin, JavascriptI18NCacheMixin,
-    BackPort17Mixin
-)
+from .sites import (GlazeAdminSite, SiteLinksMixin)
 from .urls import ProcessURLsMixin, MappedURLsMixin, AdminURL, map_admin_url
 from .utils import foreign_fields
 from .options import (

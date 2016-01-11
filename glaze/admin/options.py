@@ -3,17 +3,12 @@ from inspect import isclass
 from django.contrib.admin import ModelAdmin, TabularInline
 from django.forms.models import BaseInlineFormSet
 from django.forms.formsets import TOTAL_FORM_COUNT
+from django.contrib.admin.templatetags.admin_static import static
 from django.utils.decorators import method_decorator
 from glaze.utils.models import CreatedByMixin
 from .urls import ProcessURLsMixin, MappedURLsMixin, ExtraURLsMixin
 from .buttons import (SaveButton, SaveAsNewButton, SaveAddAnotherButton,
                       SaveContinueButton, DeleteButton)
-
-
-class GlazeMediaMixin(object):
-    class Media:
-        js = ['glaze/js/admin.js']
-        css = dict(all=['glaze/css/admin.css'])
 
 
 class PreSaveModelMixin(object):
@@ -88,14 +83,31 @@ class ReadOnlyFormSet(BaseInlineFormSet):
         return form
 
 
-class ReadOnlyInline(DisableAddMixin, DisableDeleteMixin, GlazeMediaMixin,
+class ReadOnlyInline(DisableAddMixin, DisableDeleteMixin,
                      AllFieldsReadOnlyMixin, TabularInline):
     template = 'glaze/read_only_inline.html'
     formset = ReadOnlyFormSet
     below_submit_buttons = True
 
+    @property
+    def media(self):
+        media = super(ReadOnlyInline, self).media
+        js = [static('glaze/js/admin.js')]
+        css = [static('glaze/css/admin.css')]
+        media.add_js(js)
+        media.add_css(dict(all=css))
+        return media
+
 
 class GlazeModelAdmin(
         ProcessURLsMixin, MappedURLsMixin, ExtraURLsMixin, SaveCreatedByMixin,
-        PreSaveModelMixin, GlazeMediaMixin, SubmitRowMixin, ModelAdmin):
-    pass
+        PreSaveModelMixin, SubmitRowMixin, ModelAdmin):
+
+    @property
+    def media(self):
+        media = super(GlazeModelAdmin, self).media
+        js = [static('glaze/js/admin.js')]
+        css = [static('glaze/css/admin.css')]
+        media.add_js(js)
+        media.add_css(dict(all=css))
+        return media
